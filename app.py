@@ -8,7 +8,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Output, Input, State
 
-from random import randint
+#from random import randint
 
 import os
 import pathlib
@@ -30,9 +30,9 @@ from operator import add
 # Setup the app
 # Make sure not to change this file name or the variable names below,
 # the template is configured to execute 'server' on 'app.py'
-server = flask.Flask(__name__)
-server.secret_key = os.environ.get('secret_key', str(randint(0, 1000000)))
-app = dash.Dash(__name__, server=server)
+#server = flask.Flask(__name__)
+#server.secret_key = os.environ.get('secret_key', str(randint(0, 1000000)))
+#app = dash.Dash(__name__, server=server)
 
 WNL = nltk.WordNetLemmatizer()
 
@@ -877,4 +877,4 @@ def update_themes_drop_on_click(value):
     return "data"
 
 if __name__ == "__main__":
-    app.run(debug=True, threaded=True)
+    app.run_server(debug=True, threaded=True)
