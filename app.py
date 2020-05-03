@@ -394,7 +394,7 @@ NAVBAR = dbc.Navbar(
                 [
                     dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
                     dbc.Col(
-                        dbc.NavbarBrand("Articles around Aadhaar", className="ml-2")
+                        dbc.NavbarBrand("Firstpost News on Aadhaar", className="ml-2")
                     ),
                 ],
                 align="center",
