@@ -400,7 +400,7 @@ NAVBAR = dbc.Navbar(
                 align="center",
                 no_gutters=True,
             ),
-            href="https://plot.ly",
+            href="https://www.firstpost.com/tag/aadhaar",
         )
     ],
     color="dark",
