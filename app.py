@@ -49,7 +49,7 @@ ngram_df = pd.read_csv("source/ngram_counts_data.csv", index_col=0)
 DATA_PATH = pathlib.Path(__file__).parent.resolve()
 EXTERNAL_STYLESHEETS = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 FILENAME = "source/firstpost2.csv"
-PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
+PLOTLY_LOGO = "https://diri.isb.edu/wp-content/uploads/2018/04/logo_edited.png"
 GLOBAL_DF = pd.read_csv(DATA_PATH.joinpath(FILENAME), header=0)
 """
 We are casting the whole column to datetime to make life easier in the rest of the code.
