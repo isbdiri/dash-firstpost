@@ -8,7 +8,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Output, Input, State
 
-from random import randint
+#from random import randint
 
 import os
 import pathlib
@@ -26,8 +26,6 @@ from dateutil import relativedelta
 from wordcloud import WordCloud, STOPWORDS
 from sklearn.feature_extraction.text import CountVectorizer
 from operator import add
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-analyser = SentimentIntensityAnalyzer()
 
 WNL = nltk.WordNetLemmatizer()
 
