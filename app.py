@@ -447,13 +447,13 @@ NAVBAR = dbc.Navbar(
                 [
                     dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
                     dbc.Col(
-                        dbc.NavbarBrand("Articles around Aadhaar", className="ml-2")
+                        dbc.NavbarBrand("Firstpost News on Aadhaar", className="ml-2")
                     ),
                 ],
                 align="center",
                 no_gutters=True,
             ),
-            href="https://plot.ly",
+            target="_blank", href="https://www.firstpost.com/tag/aadhaar",
         )
     ],
     color="dark",
