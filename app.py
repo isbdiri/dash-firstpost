@@ -8,7 +8,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Output, Input, State
 
-#from random import randint
+from random import randint
 
 import os
 import pathlib
@@ -26,13 +26,8 @@ from dateutil import relativedelta
 from wordcloud import WordCloud, STOPWORDS
 from sklearn.feature_extraction.text import CountVectorizer
 from operator import add
-
-# Setup the app
-# Make sure not to change this file name or the variable names below,
-# the template is configured to execute 'server' on 'app.py'
-#server = flask.Flask(__name__)
-#server.secret_key = os.environ.get('secret_key', str(randint(0, 1000000)))
-#app = dash.Dash(__name__, server=server)
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+analyser = SentimentIntensityAnalyzer()
 
 WNL = nltk.WordNetLemmatizer()
 
@@ -55,7 +50,7 @@ ngram_df = pd.read_csv("source/ngram_counts_data.csv", index_col=0)
 
 DATA_PATH = pathlib.Path(__file__).parent.resolve()
 EXTERNAL_STYLESHEETS = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
-FILENAME = "source/firstpost.csv"
+FILENAME = "source/firstpost2.csv"
 PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
 GLOBAL_DF = pd.read_csv(DATA_PATH.joinpath(FILENAME), header=0)
 """
@@ -65,6 +60,22 @@ It isn't a terribly expensive operation so for the sake of tidyness we went this
 GLOBAL_DF["Date"] = pd.to_datetime(
     GLOBAL_DF["Date"], format="%d/%m/%y"
 )
+
+"""
+Precomputing senti values
+"""
+themel2=['aadhaar_based_subsidies',
+	'aadhaar_based_schemes',
+	'digital_stack',
+	'enrolment_process',
+	'e-governance',
+	'financial_inclusion',
+	'macroeconomic_policy',
+	'data_security',
+	'aadhaar_political_debates',
+	'judiciary_right_to_privacy',
+	'money_laundering',
+	'crime']
 
 """
 In order to make the graphs more useful we decided to prevent some words from being included
@@ -94,13 +105,13 @@ def sample_data(dataframe, float_percent):
     return dataframe.sample(frac=float_percent, random_state=1)
 
 
-def get_complaint_count_by_company(dataframe):
+def get_complaint_count_by_theme(dataframe):
     """ Helper function to get complaint counts for unique themes """
-    company_counts = dataframe["Theme"].value_counts()
+    theme_counts = dataframe["Theme"].value_counts()
     # we filter out all themes with less than 11 complaints for now
-    company_counts = company_counts[company_counts > 10]
-    values = company_counts.keys().tolist()
-    counts = company_counts.tolist()
+    theme_counts = theme_counts[theme_counts > 10]
+    values = theme_counts.keys().tolist()
+    counts = theme_counts.tolist()
     check=0
     for count in counts:
     	check+=count
@@ -110,11 +121,11 @@ def get_complaint_count_by_company(dataframe):
 
 def get_count_by_ngram(dataframe):
     """ Helper function to get complaint counts for unique themes """
-    company_counts = dataframe["ngram"].value_counts()
+    theme_counts = dataframe["ngram"].value_counts()
     # we filter out all themes with less than 11 complaints for now
-    company_counts = company_counts[company_counts > 10]
-    values = company_counts.keys().tolist()
-    counts = company_counts.tolist()
+    theme_counts = theme_counts[theme_counts > 10]
+    values = theme_counts.keys().tolist()
+    counts = theme_counts.tolist()
     return values, counts
 
 
@@ -131,12 +142,56 @@ def calculate_themes_sample_data(dataframe, sample_size, time_values):
             (dataframe["Date"] >= min_date)
             & (dataframe["Date"] <= max_date)
         ]
-    company_counts = dataframe["Theme"].value_counts()
-    company_counts_sample = company_counts[:sample_size]
-    values_sample = company_counts_sample.keys().tolist()
-    counts_sample = company_counts_sample.tolist()
 
-    return values_sample, counts_sample
+    #return values
+    theme_counts = dataframe["Theme"].value_counts()
+    theme_counts_sample = theme_counts[:sample_size]
+    values_sample = theme_counts_sample.keys().tolist()
+    counts_sample = theme_counts_sample.tolist()
+
+    #get sentiment values
+    sentil={}
+    countl={}
+    for index, row in dataframe.iterrows():
+        theme=str(row["Theme"])
+        try:
+            countl[theme]+=1
+            if row['Sentiment']=="Negative":
+                sentil[theme]-=1
+            elif row['Sentiment']=="Positive":
+                sentil[theme]+=1
+        except:
+            countl[theme]=1
+            if row['Sentiment']=="Negative":
+                sentil[theme]=-1
+            elif row['Sentiment']=="Positive":
+                sentil[theme]=1
+    sentimean={}
+    for theme in themel2:
+        try:
+            sentimean[theme]=sentil[theme]/countl[theme]
+        except:
+            sentimean[theme]=0
+    colordic={}
+    for theme in themel2:
+        if sentimean[theme]<-0.5:
+            colordic[theme]='red'
+        elif sentimean[theme]<-0.05:
+            colordic[theme]='darkorange'
+        elif sentimean[theme]<0.05:
+            colordic[theme]='yellow'
+        elif sentimean[theme]<0.5:
+            colordic[theme]='limegreen'
+        elif sentimean[theme]<1:
+            colordic[theme]='forestgreen'
+        else:
+            colordic[theme]='grey'
+
+    senti_sample=[]
+    for theme in values_sample:
+    	senti_sample.append(colordic[str(theme)])
+
+    return values_sample, counts_sample, senti_sample
 
 def calculate_word_data(theme, word):
 	if word != "data":
@@ -394,13 +449,13 @@ NAVBAR = dbc.Navbar(
                 [
                     dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
                     dbc.Col(
-                        dbc.NavbarBrand("Firstpost News on Aadhaar", className="ml-2")
+                        dbc.NavbarBrand("Articles around Aadhaar", className="ml-2")
                     ),
                 ],
                 align="center",
                 no_gutters=True,
             ),
-            target="_blank", href="https://www.firstpost.com/tag/aadhaar",
+            href="https://plot.ly",
         )
     ],
     color="dark",
@@ -447,6 +502,19 @@ LEFT_COLUMN = dbc.Jumbotron(
         ),
         html.Label("Select time frame", className="lead"),
         html.Div(dcc.RangeSlider(id="time-window-slider"), style={"marginBottom": 50}),
+        html.Label("Colour key", style={"marginTop": 50}, className="lead"),
+        html.P(
+            "Red: Highly Negative, Orange: Slightly Negative,",# Light Green: Slightly Positive, Dark Green: Highly Positive, Yellow: Neutral, Grey: Cannot determine",
+            style={"fontSize": 10, "font-weight": "lighter"},
+        ),
+        html.P(
+            "Light Green: Slightly Positive, Dark Green: Highly Positive,",
+            style={"fontSize": 10, "font-weight": "lighter"},
+        ),
+        html.P(
+            "Yellow: Neutral, Grey: Data Insufficient",
+            style={"fontSize": 10, "font-weight": "lighter"},
+        ),
     ]
 )
 
@@ -726,7 +794,7 @@ def populate_themes_dropdown(time_values, n_value):
     if time_values is not None:
         pass
     n_value += 1
-    themes_names, counts = get_complaint_count_by_company(GLOBAL_DF)
+    themes_names, counts = get_complaint_count_by_theme(GLOBAL_DF)
     counts.append(1)
     return make_options_themes_drop(themes_names)
 
@@ -753,7 +821,7 @@ def populate_themes_dropdown(time_values, n_value):
     if time_values is not None:
         pass
     n_value += 1
-    themes_names, counts = get_complaint_count_by_company(GLOBAL_DF)
+    themes_names, counts = get_complaint_count_by_theme(GLOBAL_DF)
     counts.append(1)
     return make_options_themes_drop(themes_names)
 
@@ -772,7 +840,7 @@ def update_themes_sample_plot(n_value, time_values):
     themes_sample_count = 10
     local_df = sample_data(GLOBAL_DF, n_float)
     min_date, max_date = time_slider_to_date(time_values)
-    values_sample, counts_sample = calculate_themes_sample_data(
+    values_sample, counts_sample, senti_sample = calculate_themes_sample_data(
         local_df, themes_sample_count, [min_date, max_date]
     )
     data = [
@@ -783,7 +851,8 @@ def update_themes_sample_plot(n_value, time_values):
             "textposition": "auto",
             "type": "bar",
             "name": "",
-        }
+            "marker": {"color" : senti_sample}
+        },
     ]
     layout = {
         "autosize": False,
