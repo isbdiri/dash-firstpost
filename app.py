@@ -8,8 +8,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Output, Input, State
 
-#from random import randint
-
 import os
 import pathlib
 import re
@@ -49,7 +47,7 @@ ngram_df = pd.read_csv("source/ngram_counts_data.csv", index_col=0)
 DATA_PATH = pathlib.Path(__file__).parent.resolve()
 EXTERNAL_STYLESHEETS = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 FILENAME = "source/firstpost2.csv"
-PLOTLY_LOGO = "https://diri.isb.edu/wp-content/uploads/2018/04/logo_edited.png"
+PLOTLY_LOGO = "https://diri.isb.edu/wp-content/uploads/2018/04/logo_edited.png"#"https://images.plot.ly/logo/new-branding/plotly-logomark.png"
 GLOBAL_DF = pd.read_csv(DATA_PATH.joinpath(FILENAME), header=0)
 """
 We are casting the whole column to datetime to make life easier in the rest of the code.
@@ -172,18 +170,14 @@ def calculate_themes_sample_data(dataframe, sample_size, time_values):
             sentimean[theme]=0
     colordic={}
     for theme in themel2:
-        if sentimean[theme]<-0.5:
+        if sentimean[theme]<-0.05:
             colordic[theme]='red'
-        elif sentimean[theme]<-0.05:
-            colordic[theme]='darkorange'
-        elif sentimean[theme]<0.05:
-            colordic[theme]='yellow'
         elif sentimean[theme]<0.5:
-            colordic[theme]='limegreen'
+            colordic[theme]='yellow'
         elif sentimean[theme]<1:
             colordic[theme]='forestgreen'
         else:
-            colordic[theme]='grey'
+            colordic[theme]='yellow'
 
     senti_sample=[]
     for theme in values_sample:
@@ -447,13 +441,12 @@ NAVBAR = dbc.Navbar(
                 [
                     dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
                     dbc.Col(
-                        dbc.NavbarBrand("Firstpost News on Aadhaar", className="ml-2")
+                        dbc.NavbarBrand("Articles around Aadhaar", className="ml-2")
                     ),
                 ],
                 align="center",
                 no_gutters=True,
             ),
-            target="_blank", href="https://www.firstpost.com/tag/aadhaar",
         )
     ],
     color="dark",
@@ -502,15 +495,7 @@ LEFT_COLUMN = dbc.Jumbotron(
         html.Div(dcc.RangeSlider(id="time-window-slider"), style={"marginBottom": 50}),
         html.Label("Colour key", style={"marginTop": 50}, className="lead"),
         html.P(
-            "Red: Highly Negative, Orange: Slightly Negative,",# Light Green: Slightly Positive, Dark Green: Highly Positive, Yellow: Neutral, Grey: Cannot determine",
-            style={"fontSize": 10, "font-weight": "lighter"},
-        ),
-        html.P(
-            "Light Green: Slightly Positive, Dark Green: Highly Positive,",
-            style={"fontSize": 10, "font-weight": "lighter"},
-        ),
-        html.P(
-            "Yellow: Neutral, Grey: Data Insufficient",
+            "Red: Negative, Yellow: Neutral, Green: Positive",
             style={"fontSize": 10, "font-weight": "lighter"},
         ),
     ]
