@@ -481,7 +481,7 @@ LEFT_COLUMN = dbc.Jumbotron(
                 90: "",
                 100: "100%",
             },
-            value=20,
+            value=100,
         ),
         html.Label("Select a theme", style={"marginTop": 50}, className="lead"),
         html.P(
