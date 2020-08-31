@@ -144,7 +144,6 @@ def calculate_themes_sample_data(dataframe, sample_size, time_values):
     theme_counts_sample = theme_counts[:sample_size]
     values_sample = theme_counts_sample.keys().tolist()
     counts_sample = theme_counts_sample.tolist()
-
     #get sentiment values
     sentil={}
     countl={}
@@ -171,13 +170,13 @@ def calculate_themes_sample_data(dataframe, sample_size, time_values):
     colordic={}
     for theme in themel2:
         if sentimean[theme]<-0.05:
-            colordic[theme]='red'
+            colordic[theme]='#821600'
         elif sentimean[theme]<0.5:
-            colordic[theme]='yellow'
+            colordic[theme]='#00E5F0'
         elif sentimean[theme]<1:
-            colordic[theme]='forestgreen'
+            colordic[theme]='#044600'
         else:
-            colordic[theme]='yellow'
+            colordic[theme]='#00E5F0'
 
     senti_sample=[]
     for theme in values_sample:
@@ -441,7 +440,7 @@ NAVBAR = dbc.Navbar(
                 [
                     dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
                     dbc.Col(
-                        dbc.NavbarBrand("Articles around Aadhaar", className="ml-2")
+                        dbc.NavbarBrand("Articles on Aadhaar", className="ml-2")
                     ),
                 ],
                 align="center",
@@ -483,19 +482,19 @@ LEFT_COLUMN = dbc.Jumbotron(
             },
             value=100,
         ),
-        html.Label("Select a theme", style={"marginTop": 50}, className="lead"),
+        html.Label("Select a theme", style={"marginTop": 15}, className="lead"),
         html.P(
             "(You can use the dropdown or click the barchart on the right)",
             style={"fontSize": 10, "font-weight": "lighter"},
         ),
         dcc.Dropdown(
-            id="themes-drop", clearable=False, style={"marginBottom": 50, "font-size": 12}
+            id="themes-drop", clearable=False, style={"marginBottom": 15, "font-size": 12}
         ),
         html.Label("Select time frame", className="lead"),
-        html.Div(dcc.RangeSlider(id="time-window-slider"), style={"marginBottom": 50}),
-        html.Label("Colour key", style={"marginTop": 50}, className="lead"),
+        html.Div(dcc.RangeSlider(id="time-window-slider"), style={"marginBottom": 0}),
+        html.Label("Colour key", style={"marginTop": 15}, className="lead"),
         html.P(
-            "Red: Negative, Yellow: Neutral, Green: Positive",
+            "Red: Negative, Blue: Neutral, Green: Positive",
             style={"fontSize": 10, "font-weight": "lighter"},
         ),
     ]
@@ -509,9 +508,9 @@ LEFT_COLUMN_II = dbc.Jumbotron(
         dcc.Dropdown(
             id="theme-drop-ii", clearable=False, style={"marginBottom": 50, "font-size": 12}
         ),
-        html.Label("Select a word", style={"marginTop": 50}, className="lead"),
+        html.Label("Select a word", style={"marginTop": 60}, className="lead"),
         dcc.Dropdown(
-            id="word-drop", clearable=False, style={"marginBottom": 50, "font-size": 12}
+            id="word-drop", clearable=False, style={"marginBottom": 70, "font-size": 12}
         ),
     ]
 )
@@ -574,7 +573,7 @@ WORDCLOUD_PLOTS = [
 ]
 
 TOP_THEMES_PLOT = [
-    dbc.CardHeader(html.H5("Top 10 themes by number of articles")),
+    dbc.CardHeader(html.H5("Context of Aadhaar in news media")),
     dbc.CardBody(
         [
             dcc.Loading(
@@ -649,7 +648,7 @@ TOP_NGRAM_COMPS = [
 ]
 
 WORD_PLOT = [
-    dbc.CardHeader(html.H5("Year-wise distrution of selected word in theme")),
+    dbc.CardHeader(html.H5("Year-wise distribution of selected word in theme")),
     dbc.CardBody(
         [
             dcc.Loading(
@@ -830,17 +829,30 @@ def update_themes_sample_plot(n_value, time_values):
         {
             "x": values_sample,
             "y": counts_sample,
-            "text": values_sample,
-            "textposition": "auto",
+            #"text": values_sample,
+            #"textposition": "auto",
             "type": "bar",
             "name": "",
             "marker": {"color" : senti_sample}
         },
     ]
+    boldl=[]
+    for value in values_sample:
+    	value=re.sub(r"_"," ",value)
+    	value=value.title()
+    	value="<b>"+value+"</b>"
+    	boldl.append(value)
     layout = {
-        "autosize": False,
-        "margin": dict(t=10, b=10, l=40, r=0, pad=4),
-        "xaxis": {"showticklabels": False},
+        "autosize": True,
+        #"margin": dict(t=10, b=0, l=40, r=0, pad=4),
+        "xaxis": {"showticklabels": True,
+                'automargin': True,
+                'ticktext': boldl,
+                'tickvals': values_sample,
+                'title': 'Themes',
+                #'nticks': 10,
+                'tickangle': 30,
+            },
     }
     print("redrawing themes-sample...done")
     return [{"data": data, "layout": layout}, {"display": "none"}]
@@ -891,16 +903,23 @@ def update_words_plot(theme, word):
         {
             "x": values_sample,
             "y": counts_sample,
-            "text": values_sample,
-            "textposition": "auto",
+#            "text": values_sample,
+#            "textposition": "auto",
             "type": "bar",
             "name": "",
         }
     ]
     layout = {
-        "autosize": False,
-        "margin": dict(t=10, b=10, l=40, r=0, pad=4),
-        "xaxis": {"showticklabels": False},
+        "autosize": True,
+        #"margin": dict(t=10, b=10, l=40, r=0, pad=4),
+        "xaxis": {"showticklabels": True,
+                'automargin': True,
+                'title': 'Year',
+                'ticktext': values_sample,
+                'tickvals': values_sample,
+                #'nticks': 11,
+                'tickangle': 0,
+            },
     }
     return [{"data": data, "layout": layout}, {"display": "none"}]
 
@@ -929,4 +948,4 @@ def update_themes_drop_on_click(value):
     return "data"
 
 if __name__ == "__main__":
-    app.run_server(debug=True, threaded=True)
+    app.run_server(debug=True, threaded=True, host='127.0.0.2')
